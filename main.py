@@ -17,6 +17,9 @@ def main(page: ft.Page):
             task_list.controls.append(create_task_row(task_id, task_text))
         page.update()
 
+
+
+
     def create_task_row(task_id, task_text):
         task_field = ft.TextField(value=task_text, expand=True, dense=True, read_only=True)
 
