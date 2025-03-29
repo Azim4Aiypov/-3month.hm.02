@@ -10,27 +10,18 @@ def main(page: ft.Page):
     task_list = ft.Column(spacing=10)
 
     filter_type = "all"
-
-
     def load_tasks():
         task_list.controls.clear()
-        for task_id, task_text, completed in main_db.get_tasks(filter_type):
-            task_list.controls.append(create_task_row(task_id, task_text, completed))
+        for task_id, task_text, completed, created_at in main_db.get_tasks(filter_type):
+            task_list.controls.append(create_task_row(task_id, task_text,created_at, completed))
         page.update()
-        # if 0< load_tasks <2:
-            # return "ты не очень"
-        # elif 1 < load_tasks <3:
-            # return "ты не плох"
-        # elif 2 < load_tasks < 4:
-            # return "а ты харош "
-        # elif 4 < load_tasks :
-            # return "да ты супер"
-        # else:
-            # return "ну ты и лох"
+      
 
+    def create_task_row(task_id, task_text, created_at, completed):
+        task_field = ft.TextField(value=f"{task_text} - {created_at}", expand=True, dense=True, read_only=True)
+        # date = ft.Text(value = created_at, size =12)
 
-    def create_task_row(task_id, task_text, completed):
-        task_field = ft.TextField(value=task_text, expand=True, dense=True, read_only=True)
+        task_field .color = ft.Colors.YRELLOW if completed else ft.Colors.WHITE
         task_checkbox = ft.Checkbox(
             value=bool(completed), 
             on_change=lambda e: toggle_task(task_id, e.control.value)
@@ -45,18 +36,25 @@ def main(page: ft.Page):
             task_field.read_only = True
             page.update()
 
+        def done(e):
+            main_db.done_task_(task_id)
+            load_tasks()
+            page.update()
+
         return ft.Row([
             task_checkbox,
             task_field,
+            task_field,
             ft.IconButton(ft.icons.EDIT, icon_color=ft.colors.YELLOW_400, on_click=enable_edit),
             ft.IconButton(ft.icons.SAVE, icon_color=ft.colors.GREEN_400, on_click=save_edit),
-            ft.IconButton(ft.icons.DELETE, icon_color=ft.colors.RED_400, on_click=lambda e: delete_task(task_id))
+            ft.IconButton(ft.icons.DELETE, icon_color=ft.colors.RED_400, on_click=lambda e: delete_task(task_id)),
+            ft.IconButton(ft.icons.CHECK, icon_color=ft.colors.GREEN_400, on_click=done)
         ], alignment=ft.MainAxisAlignment.SPACE_BETWEEN)
     
     def add_task(e):
         if task_input.value.strip():
-            task_id = main_db.add_task_db(task_input.value)
-            task_list.controls.append(create_task_row(task_id, task_input.value))
+            task_id, task_input.value, created_at = main_db.add_task_db(task_input.value)
+            task_list.controls.append(create_task_row(task_id, task_input.value, created_at ))
             task_input.value = ""
             page.update()
 
@@ -68,7 +66,26 @@ def main(page: ft.Page):
         main_db.delete_task_db(task_id)
         load_tasks()
         
-    
+    def sort_date(e):
+          task_list.controls.clear()
+          for task_id, task_text, completed, created_at in main_db.sort_task_date(filter_type):
+            task_list.controls.append(create_task_row(task_id, task_text,created_at, completed))
+          page.update()
+
+
+    def sort_status(e):
+        task_list.controls.clear()
+        for task_id, task_text, completed, created_at in main_db.sort_task_status(filter_type):
+            task_list.controls.append(create_task_row(task_id, task_text,created_at, completed))
+        page.update()
+
+    def ctear_done(e):
+        main_db.delete_done()
+        page.update()
+
+
+
+    clear = ft.ElevatedButton("Удалить выполненное", on_click= clear_done, icon=ft.icons.DELETE)
     def set_filter(filter_value):
         nonlocal filter_type 
 
@@ -78,6 +95,9 @@ def main(page: ft.Page):
 
     task_input = ft.TextField(hint_text='Добавьте гднида задачу', expand=True, dense=True, on_submit=add_task)
     add_button = ft.ElevatedButton("Добавить", on_click=add_task, icon=ft.icons.ADD)
+    sort_by_date = ft.ElevatedButton("Сортировать по дате ", on_click=sort_date, icon=ft.icons.DATE_RANGE)
+    sort_by_status = ft.ElevatedButton("Сортировать по статусу", n_click=sort_status, icon=ft.icons.CHECK_CIRCLE)
+
 
     filter_button = ft.Row([
         ft.ElevatedButton("прям все что вы сделали", on_click=lambda e: set_filter("all")),
@@ -93,8 +113,9 @@ def main(page: ft.Page):
     # )
 
     content = ft.Container(
-        content = ft.Column([
+        content = ft.Column([clear,
             ft.Row([task_input, add_button], alignment=ft.MainAxisAlignment.SPACE_BETWEEN),
+            ft.Row([sort_by_date, sort_by_status], alignment=ft.MainAxisAlignment),
             filter_button,
             task_list
         ], alignment=ft.MainAxisAlignment.CENTER), 
@@ -117,12 +138,12 @@ def main(page: ft.Page):
         page.update()
 
     page.add(background)
-    page.on_resized = on_resize
+    page.on_relized =on_resize
 
     load_tasks()
 
 
-if __name__ == '__main__':
+if __name__ == '__main_hm__':
     main_db.init_db()
     ft.app(target=main)
     
