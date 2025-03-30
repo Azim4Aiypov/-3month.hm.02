@@ -1,17 +1,19 @@
-CCREATE_TABLE_TASKS = """
-    CREATE TABLE IF NOT EXISTS tasks (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        task TEXT NOT NULL,
-        completed INTEGER DEFAULT 0
-        creted_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
-        )
+CREATE_TABLE_TASKS = """
+CREATE TABLE IF NOT EXISTS tasks (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    task_text TEXT NOT NULL,  -- здесь task_text вместо task
+    completed INTEGER NOT NULL DEFAULT 0,
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    in_progress INTEGER NOT NULL DEFAULT 0
+);
 """
 
-SELECT_TASKS = "SELECT id, task, completed, created_at FROM tasks"
+SELECT_TASKS = "SELECT id, task_text, completed, created_at, in_progress FROM tasks"
 
 INSERT_TASK = "INSERT INTO tasks (task) VALUES (?)"
 
 UPDATE_TASK = "UPDATE tasks SET task = ? WHERE id = ?"
+
 UPDATE_TASK_DONE = "UPDATE tasks SET completed = 1 WHERE id = ?"
 
 DELETE_TASK = "DELETE FROM tasks WHERE id = ?"
