@@ -4,7 +4,8 @@ from db import main_db
 def main(page: ft.Page):
     page.title = 'ToDo List'
     page.theme_mode = ft.ThemeMode.LIGHT
-    page.window_maximized = True  # Исправлено
+    page.window_maximized = True 
+
     task_list = ft.Column(spacing=10)
 
     def load_tasks():
@@ -14,8 +15,13 @@ def main(page: ft.Page):
         page.update()
 
     def create_task_row(task_id, task_text, created_at, completed):
-        task_field = ft.TextField(value=f"{task_text} - {created_at}", expand=True, dense=True, read_only=True)
-        task_field.color = ft.Colors.YELLOW if completed else ft.Colors.WHITE
+        task_field = ft.TextField(
+            value=f"{task_text} - {created_at}",
+            expand=True,
+            dense=True,
+            read_only=True,
+            color=ft.Colors.YELLOW if completed else ft.Colors.WHITE
+        )
 
         def enable_edit(e):
             task_field.read_only = False
@@ -67,12 +73,12 @@ def main(page: ft.Page):
         load_tasks()
         page.update()
 
-    # Интерфейс
     clear = ft.ElevatedButton("", on_click=clear_done, icon=ft.Icons.DELETE)
     task_input = ft.TextField(hint_text='Введите задачу...', expand=True, dense=True, on_submit=add_task)
     add_button = ft.ElevatedButton("", on_click=add_task, icon=ft.Icons.ADD)
     sort_by_date = ft.ElevatedButton("", on_click=sort_date, icon=ft.Icons.DATE_RANGE)
     sort_by_status = ft.ElevatedButton("", on_click=sort_status, icon=ft.Icons.CHECK_CIRCLE)
+
 
     content = ft.Container(
         content=ft.Column([
@@ -99,8 +105,8 @@ def main(page: ft.Page):
         background_image.height = page.height
         page.update()
 
-    page.add(background)
     page.on_resized = on_resize
+    page.add(background)
 
     load_tasks()
 
